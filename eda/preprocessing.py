@@ -2,7 +2,23 @@
 # Preprocessing
 # Modifying df to make it palatable to word2vec model
 
+import numpy as np
 import pandas as pd
+
+def create_binned_columns(imdb_df):
+    '''
+    Creates additional columns in IMDB dataframe for numerical data that has to
+    be tagged categorically.
+    '''
+    # Duration: tags movies with duration longer than mean as long, and shorter
+    # as short
+    imdb_df2 = imdb_df.copy()
+    imdb_df2['duration_binned'] = np.where(imdb_df2['duration'] >= \
+        imdb_df2.duration.mean(), 'Long_Movie', 'Short_Movie')
+    # IMDB Score: tags movies with score higher than mean as good, and lower as bad
+    imdb_df2['imdb_score_binned'] = np.where(imdb_df2['imdb_score'] >= \
+        imdb_df2.imdb_score.mean(), 'Good_Score', 'Bad_Score')
+    return imdb_df2
 
 def clean_columns(imdb_df):
     '''
@@ -10,8 +26,11 @@ def clean_columns(imdb_df):
     '''
     # Select pertinent columns from imdb_df
     movie_df = imdb_df[['movie_title','director_name','actor_1_name', \
-        'actor_2_name','actor_3_name','genres','plot_keywords', 'country', \
-        'content_rating']]
+        'actor_2_name','actor_3_name','genres','plot_keywords','country', \
+        'content_rating','duration_binned','imdb_score_binned']]
+
+    # Clean up movie title string
+    movie_df.movie_title = movie_df.movie_title.apply(lambda x: x.strip('\xc2\xa0'))
 
     # # Only retain movies with directors & years listed - movies without directors
     # # seem to be TV shows, not movies, only 4 rows w/o year
@@ -61,9 +80,10 @@ def create_tags(movie_df):
     '''
     movie_df['tags'] = movie_df.director_name + movie_df.actor_1_name + \
         movie_df.actor_2_name + movie_df.actor_3_name + movie_df.genres + \
-        movie_df.plot_keywords + movie_df.content_rating + movie_df.country
+        movie_df.plot_keywords + movie_df.content_rating + movie_df.country + \
+        movie_df.duration_binned + movie_df.imdb_score_binned
     # Drop all columns that are not movie_title or tags
-    movie_df.drop(movie_df.columns[[1,2,3,4,5,6,7,8]], axis=1, inplace=True)
+    movie_df.drop(movie_df.columns[[1,2,3,4,5,6,7,8,9,10]], axis=1, inplace=True)
     return movie_df
 
 def preprocess(imdb_df):
@@ -74,12 +94,11 @@ def preprocess(imdb_df):
     for movie tags - a list of strings such as movie director, genres, plot
     keywords, etc.
     '''
-    cleaned_movie_df = clean_columns(imdb_df)
+    imdb_df2 = create_binned_columns(imdb_df)
+    cleaned_movie_df = clean_columns(imdb_df2)
     movie_df = create_tags(cleaned_movie_df)
 
     movie_df.tags = movie_df.tags.apply(lambda x: replace_space(x))
-    # Clean up movie title string
-    movie_df.movie_title = movie_df.movie_title.apply(lambda x: x.strip('\xc2\xa0'))
     # Reset indices so no missing indices, just in case
     movie_df = movie_df.reset_index(drop=True)
     return movie_df

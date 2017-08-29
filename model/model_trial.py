@@ -15,7 +15,7 @@ import preprocessing
 
 def w2v():
     # Fit model to sentences
-    w2v_model = Word2Vec(sentences, iter=50, sg=1)
+    w2v_model = Word2Vec(sentences, sg=1, iter=50, window=20)
     w2v_model.save('trial_w2v_model')
     tag_vectors = w2v_model.wv
     return w2v_model, tag_vectors
@@ -26,7 +26,7 @@ def d2v():
         u_sentence = [unicode(x, 'utf-8') for x in sentence]
         tagged_sentences.append(TaggedDocument(u_sentence,[movie_df.movie_title[i]]))
     # Fit model to sentences
-    d2v_model = Doc2Vec(tagged_sentences, iter=50)
+    d2v_model = Doc2Vec(tagged_sentences, iter=50, window=20)
     d2v_model.save('trial_d2v_model')
     movie_vectors = d2v_model.docvecs
     return d2v_model, movie_vectors

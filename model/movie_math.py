@@ -10,16 +10,36 @@ import sys
 sys.path.insert(0, '/Users/nikhilmakaram/Documents/Python/Galvanize_DSI/movie2vec/eda')
 import preprocessing
 
+def most_similar_tags():
+    similar_tags = tag_vectors.most_similar(positive=['Steven_Spielberg'])
+    print '\nMost similar tags to: Steven Spielberg'
+    print '--------------------------------------'
+    for tag in similar_tags:
+        print tag
+
+def tag_similarity():
+    tag_similarity = tag_vectors.similarity('Steven_Spielberg','J.J._Abrams')
+    print '\nSimilarity between Steven Spielberg and J.J. Abrams'
+    print '---------------------------------------------------'
+    print tag_similarity
+
+def most_similar_movies():
+    similar_movies = movie_vectors.most_similar(positive=[654,3375])
+    print "\nThe Matrix + On Her Majesty's Secret Service = "
+    print '-----------------------------------------------'
+    for movie in similar_movies:
+        print movie
+
 def do_some_math():
-    print 'Most similar directors to: Steven Spielberg:'
-    print tag_vectors.most_similar(positive=['Steven_Spielberg'])
-
-    spielberg_abrams_sim = tag_vectors.similarity('J.J._Abrams','Steven_Spielberg')
-    print 'Similarity between J.J. Abrams and Steven Spielberg:', \
-        spielberg_abrams_sim
-
-    print "The Matrix + On Her Majesty's Secret Service = "
-    print movie_vectors.most_similar(positive=[654,3375])
+    '''
+    Calls functions that calculate example similarities and print out results
+    to terminal as examples for intuitive evaluation of model performances.
+    '''
+    print '\nMovie Math:'
+    print '==================================================='
+    most_similar_tags()
+    tag_similarity()
+    most_similar_movies()
 
 def get_data():
     # Get data
@@ -31,10 +51,10 @@ def get_data():
 
 if __name__ == '__main__':
     movie_df = get_data()
-
+    # Load up models
     w2v_model = Word2Vec.load('trial_w2v_model')
     d2v_model = Doc2Vec.load('trial_d2v_model')
-
+    # Load up tag & movie vectors
     tag_vectors = w2v_model.wv
     movie_vectors = d2v_model.docvecs
 
@@ -42,42 +62,13 @@ if __name__ == '__main__':
 
 
 '''
-Examples:
----------
-> tag_vectors.most_similar(positive=['Steven_Spielberg'])
->
-[('Wolfgang_Petersen', 0.9462029933929443),
- ('Ridley_Scott', 0.9422283172607422),
- ('George_Lucas', 0.939114511013031),
- ('Terrence_Malick', 0.9237831830978394),
- ('Sam_Mendes', 0.9232810139656067),
- ('Robert_Zemeckis', 0.921073853969574),
- ('Marc_Forster', 0.9180954694747925),
- ('Alex_Proyas', 0.9180061221122742),
- ('Robert_Redford', 0.9177207946777344),
- ('Eamonn_Walker', 0.9169954657554626)]
+Notes:
+------
+To get an index for a particular movie:
+> movie_df.loc[movie_df.movie_title == 'The Godfather'].index[0]
+> 3466
 
-> tag_vectors.similarity('J.J._Abrams','Steven_Spielberg')
-> 0.83269052698220802
-
+To get a movie at a particular index:
 > movie_df.movie_title.loc[654]
 > 'The Matrix'
-> movie_df.movie_title.loc[3375]
-> 'On Her Majesty's Secret Service'
-
-> movie_vectors.most_similar(positive=[654,3375])
->
- [('Exit Wounds', 0.9083218574523926),
- ('Bottle Rocket', 0.9036020636558533),
- ('The Players Club', 0.9027529954910278),
- ('The Naked Gun 2\xc2\xbd: The Smell of Fear', 0.8981586694717407),
- ('Barbershop', 0.8967175483703613),
- ('Corky Romano', 0.8946095705032349),
- ('The Last Godfather', 0.8914022445678711),
- ('Hot Pursuit', 0.8901454210281372),
- ('Man of the House', 0.8899064660072327),
- ('The Campaign', 0.8872640132904053)]
-
- > movie_df.loc[movie_df.movie_title == 'The Godfather'].index[0]
- > 3466
- '''
+'''
