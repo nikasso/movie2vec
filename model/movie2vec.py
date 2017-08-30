@@ -20,33 +20,35 @@ class Movie2Vec(object):
             # sentence for each movie
         self.max_sentence_size = self.movie_df.tags_length.max()
 
-    def build_w2v_model(self, filename='w2v_model', **w2v_params):
+    def build_w2v_model(self, filepath='models/w2v_model', **w2v_params):
         '''
         Builds Word2Vec model trained to sentences, saves model.
         Also gets tag vectors from model.
 
         Input:
         ------
-        filename: str of filename you want to give built model when saving
-            (default is 'w2v_model')
+        filepath: str of filepath you want to give to built model when saving
+            (default is 'models/w2v_model')
         w2v_params: custom parameters for Word2Vec model
         '''
         print '\nTraining Word2Vec model...'
         # Fit model to sentences
         self.w2v_model = Word2Vec(self.sentences, **w2v_params)
         print 'Word2Vec model trained.'
-        self.w2v_model.save(filename)
+        #self.w2v_model.save('models/{}'.format(filename))
+        self.w2v_model.save(filepath)
         self.tag_vectors = self.w2v_model.wv
+        self.vectorize_movies()
 
-    def build_d2v_model(self, filename='d2v_model', **d2v_params):
+    def build_d2v_model(self, filepath='models/d2v_model', **d2v_params):
         '''
         Builds Doc2Vec model trained to sentences, saves model.
         Also gets movie vectors from model.
 
         Input:
         ------
-        filename: str of filename you want to give built model when saving
-            (default is 'd2v_model')
+        filepath: str of filepath you want to give to built model when saving
+            (default is 'models/d2v_model')
         d2v_params: custom parameters for Doc2Vec model
         '''
         tagged_sentences = []
@@ -57,31 +59,32 @@ class Movie2Vec(object):
         # Fit model to sentences
         self.d2v_model = Doc2Vec(tagged_sentences, **d2v_params)
         print 'Doc2Vec model trained.'
-        self.d2v_model.save(filename)
+        self.d2v_model.save(filepath)
         self.movie_vectors = self.d2v_model.docvecs
 
-    def load_w2v_model(self, filename):
+    def load_w2v_model(self, filepath):
         '''
         Loads pre-trained Word2Vec model saved under filename.
         Also gets tag vectors from model.
 
         Input:
         ------
-        filename: str of filename
+        filepath: str of file path
         '''
-        self.w2v_model = Word2Vec.load(filename)
+        self.w2v_model = Word2Vec.load(filepath)
         self.tag_vectors = self.w2v_model.wv
+        self.vectorize_movies()
 
-    def load_d2v_model(self, filename):
+    def load_d2v_model(self, filepath):
         '''
         Loads pre-trained Doc2Vec model saved under filename.
         Also gets movie vectors from model.
 
         Input:
         ------
-        filename: str of filename
+        filepath: str of file path
         '''
-        self.d2v_model = Doc2Vec.load(filename)
+        self.d2v_model = Doc2Vec.load('models/{}'.format(filename))
         self.movie_vectors = self.d2v_model.docvecs
 
     def recommend_tags(self, pos_tags=[], neg_tags=[], num_recs=10):
@@ -124,12 +127,6 @@ class Movie2Vec(object):
         '''
         similar_movies = self.movie_vectors.most_similar(positive=pos_movies, \
             negative=neg_movies, topn=num_recs)
-        # # Convert from ASCII to Unicode
-        # u_similar_movies = []   # new list of tuples where movie title strings
-        #                         # will be in unicode
-        # for movie, probab in similar_movies:
-        #     u_movie = movie.decode('utf-8')
-        #     u_similar_movies.append((u_movie, probab))
         u_similar_movies = self.convert_to_unicode(similar_movies)
         return u_similar_movies
 
@@ -138,7 +135,7 @@ class Movie2Vec(object):
         Input:
         ------
         recs: list of tuples of movie recommendations and their similarity
-            probabilities or cosine distances
+            probabilities or cosine similarities
 
         Output:
         -------
@@ -170,16 +167,19 @@ class Movie2Vec(object):
         alt_similar_movies: list of tuples of similar movies and their cosine
         distances.
         '''
-        self.vectorize_movies()
+        #self.vectorize_movies()
         result_vector = self.get_result_vector(pos_movies, neg_movies)
-        #return alt_similar_movies
-        sorted_indices, cosine_distances = self.compute_cosine(result_vector)
+        sorted_indices, cosine_similarities = self.compute_cosine(result_vector)
         alt_similar_movies = []
-        #import pdb; pdb.set_trace()
-        for i in xrange(num_recs):
-            alt_similar_movies.append((self.movie_df.title.loc[sorted_indices[i]], \
-                cosine_distances[i]))
-        ### DO NOT INCLUDE MOVIES ENTERED BY USER AS PART OF RECOMMENDATION LIST ###
+        i = 0
+        while len(alt_similar_movies) < num_recs:
+            # If similar movie is same as movies entered, skip over it
+            if sorted_indices[i] in pos_movies or sorted_indices[i] in neg_movies:
+                i += 1
+            else:
+                alt_similar_movies.append((self.movie_df.title.loc[sorted_indices[i]], \
+                    cosine_similarities[i]))
+            i += 1
         u_alt_similar_movies = self.convert_to_unicode(alt_similar_movies)
         return u_alt_similar_movies
 
@@ -194,32 +194,10 @@ class Movie2Vec(object):
         tag_vec_size = len(self.tag_vectors[one_tag]) # Get size of a tag vector
         pos_vectors = np.zeros([len(pos_movies),tag_vec_size])
         for idx, movie_idx in enumerate(pos_movies):
-            # tags_lst = self.movie_df.tags.loc[movie_idx]
-            # num_tags = self.movie_df.tags_length.loc[movie_idx]
-            # #tag_vec_len = len(self.tag_vectors[tags_lst[0]])
-            # tag_vec_array = np.empty([num_tags, tag_vec_size])
-            # for i in xrange(num_tags):
-            #     try:
-            #         tag_vec_array[i] = self.tag_vectors[tags_lst[i]]
-            #     except KeyError:
-            #         tag_vec_array[i] = np.zeros([1,tag_vec_size])
-            # movie_vector = np.mean(tag_vec_array, axis=0)
-            # pos_vectors[idx] = movie_vector
             pos_vectors[idx] = self.movie_vector_matrix[movie_idx]
         if len(neg_movies) != 0:
             neg_vectors = np.zeros([len(neg_movies),tag_vec_size])
             for idx, movie_idx in enumerate(neg_movies):
-                # tags_lst = self.movie_df.tags.loc[movie_idx]
-                # num_tags = self.movie_df.tags_length.loc[movie_idx]
-                # #tag_vec_len = len(self.tag_vectors[tags_lst[0]])
-                # tag_vec_array = np.empty([num_tags, tag_vec_size])
-                # for i in xrange(num_tags):
-                #     try:
-                #         tag_vec_array[i] = self.tag_vectors[tags_lst[i]]
-                #     except KeyError:
-                #         tag_vec_array[i] = np.zeros([1,tag_vec_size])
-                # movie_vector = np.mean(tag_vec_array, axis=0)
-                # neg_vectors[idx] = movie_vector
                 neg_vectors[idx] = self.movie_vector_matrix[movie_idx]
         else:
             neg_vectors = np.zeros([1,tag_vec_size])
@@ -234,7 +212,7 @@ class Movie2Vec(object):
         '''
         tag_vec_size = len(self.tag_vectors['Action']) # Get size of a tag vector
         self.movie_vector_matrix = np.empty([self.movie_df.shape[0],tag_vec_size])
-        print 'Vectorizing all movies...'
+        print '\nVectorizing all movies...'
         for movie_idx in xrange(self.movie_df.shape[0]):
             tags_lst = self.movie_df.tags.loc[movie_idx]
             num_tags = self.movie_df.tags_length.loc[movie_idx]
@@ -253,20 +231,20 @@ class Movie2Vec(object):
         Input:
         ------
         result_vector: numpy array to compare with each and every movie vector
-        to calculate the cosine distances between them.
+        to calculate the cosine similarities between them.
 
         Output:
         -------
-        cosine_distances: sorted numpy array of movie indices and the
-        corresponding cosine distance; ascending (so closest movies should show
+        cosine_similarities: sorted numpy array of movie indices and the
+        corresponding cosine similarity; descending (so closest movies should show
         up first)
         '''
-        cosine_distances = np.zeros(self.movie_df.shape[0])
-        for i in xrange(len(cosine_distances)):
-            cosine_distances[i] = cosine(result_vector, self.movie_vector_matrix[i])
-        sorted_indices = np.argsort(cosine_distances) # Get sorted movie indices
-        cosine_distances = cosine_distances[sorted_indices] # Sort cosine distances
-        return sorted_indices, cosine_distances
+        cosine_similarities = np.zeros(self.movie_df.shape[0])
+        for i in xrange(len(cosine_similarities)):
+            cosine_similarities[i] = 1 - cosine(result_vector, self.movie_vector_matrix[i])
+        sorted_indices = np.argsort(cosine_similarities)[::-1] # Get sorted movie indices
+        cosine_similarities = cosine_similarities[sorted_indices] # Sort cosine similarities
+        return sorted_indices, cosine_similarities
 
     def parse_input(self, in_string):
         '''
@@ -286,13 +264,4 @@ class Movie2Vec(object):
 
 
 if __name__ == '__main__':
-    # #main()
-    # # Load dataframe
-    # with open('../data/ml-latest_df.pkl') as f:
-    #     movie_df = pickle.load(f)
-    #
-    # in_string = "Godfather, The|Avatar" # Example of movies entered by user
-    # pos_movies = parse_input(in_string) # [842, 14632] for example
-    #
-    # #m2v = Movie2Vec()
     pass
