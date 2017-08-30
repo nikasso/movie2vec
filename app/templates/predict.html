@@ -24,13 +24,13 @@
     <col width="250">
       <thead>
           <th align="left">Movies</th>
-          <th align="left">Similarity Probability</th>
+          <th align="left">Similarity</th>
       </thead>
       <tbody>
-          {% for movie, probab in recommendations %}
+          {% for movie, similarity in recommendations %}
           <tr>
             <td>{{ movie }}</td>
-            <td>{{ probab }}</td>
+            <td>{{ similarity }}</td>
           </tr>
           {% endfor %}
       </tbody>
