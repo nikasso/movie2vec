@@ -1,0 +1,41 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+
+  <title>Movie2Vec Recommender</title>
+
+  <meta name="description" content="Galvanize DSI Capstone Project">
+  <meta name="author" content="Nikhil Makaram">
+
+</head>
+
+<body>
+
+  <h1>Your Movie Recommendations</h1>
+
+  <span style="color: blue; font-weight: bold;">Movies You Entered</span>
+  <p>{{ movies_entered }}</p>
+  <span style="color: blue; font-weight: bold;">Your Recommendations</span>
+  <table class="table">
+    <col width="350">
+    <col width="250">
+      <thead>
+          <th align="left">Movies</th>
+          <th align="left">Similarity Probability</th>
+      </thead>
+      <tbody>
+          {% for movie, probab in recommendations %}
+          <tr>
+            <td>{{ movie }}</td>
+            <td>{{ probab }}</td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+
+
+</body>
+</html>
