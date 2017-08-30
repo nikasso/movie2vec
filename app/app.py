@@ -22,7 +22,8 @@ app = Flask(__name__)
 # d2v_model = Doc2Vec.load('../model/trial2_d2v_model')
 
 m2v = Movie2Vec()
-m2v.load_d2v_model('../model/d2v_model3')
+#m2v.load_d2v_model('../model/models/d2v_model4')
+m2v.load_w2v_model('../model/models/w2v_model2')
 
 
 @app.route('/', methods=['GET'])
@@ -42,10 +43,9 @@ def predict():
     form and use the model to provide the recommendations.
     """
     data = str(request.form['movies_entered'])
-    #pred = str(model.predict([data])[0])
     pos_movies = m2v.parse_input(data)
-    #recs = '<Recommendations Will Be Here>'
-    recs = m2v.recommend_movies(pos_movies=pos_movies)
+    #recs = m2v.recommend_movies(pos_movies=pos_movies) # Uses Doc2Vec
+    recs = m2v.alt_recommend_movies(pos_movies=pos_movies) # Uses tag vector averaging
     return render_template('predict.html', movies_entered=data, recommendations=recs)
 
 
