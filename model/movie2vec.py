@@ -179,7 +179,7 @@ class Movie2Vec(object):
             else:
                 alt_similar_movies.append((self.movie_df.title.loc[sorted_indices[i]], \
                     cosine_similarities[i]))
-            i += 1
+                i += 1
         u_alt_similar_movies = self.convert_to_unicode(alt_similar_movies)
         return u_alt_similar_movies
 
@@ -190,8 +190,8 @@ class Movie2Vec(object):
         Adds pos_vectors and subtracts neg_vectors to get result vector, returns
         result vector.
         '''
-        one_tag = self.movie_df.tags.loc[pos_movies[0]][0] # Get an example tag
-        tag_vec_size = len(self.tag_vectors[one_tag]) # Get size of a tag vector
+        #one_tag = self.movie_df.tags.loc[pos_movies[0]][0] # Get an example tag
+        tag_vec_size = len(self.tag_vectors['Action']) # Get size of a tag vector
         pos_vectors = np.zeros([len(pos_movies),tag_vec_size])
         for idx, movie_idx in enumerate(pos_movies):
             pos_vectors[idx] = self.movie_vector_matrix[movie_idx]
