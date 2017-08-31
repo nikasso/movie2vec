@@ -15,10 +15,15 @@
 <body>
 
   <h1>Submit Your Movies</h1>
-  <p>Enter the movies you want to add, separated by pipe, into the input box below, and click the <span>Recommend</span> button to get your movie recommendations.</p>
+  <p>Enter the movies you want to add (pipe-separated) into the input box
+    below on the left, and the movies you want to subtract (pipe-separated)
+    into the input box below on the right.</p>
+  <p>Click the <span>Recommend</span> button to get your movie recommendations.</p>
 
   <form action="/predict" method='POST' >
-      <textarea name="movies_entered",
+      <textarea name="pos_movies_entered",
+                rows="1", cols="60"></textarea>
+      <textarea name="neg_movies_entered",
                 rows="1", cols="60"></textarea>
       <button type="submit">Recommend</button>
   </form>
