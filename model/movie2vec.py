@@ -38,6 +38,7 @@ class Movie2Vec(object):
         #self.w2v_model.save('models/{}'.format(filename))
         self.w2v_model.save(filepath)
         self.tag_vectors = self.w2v_model.wv
+        self.tag_list = self.tag_vectors.vocab.keys()
         self.vectorize_movies()
 
     def build_d2v_model(self, filepath='models/d2v_model', **d2v_params):
@@ -73,6 +74,7 @@ class Movie2Vec(object):
         '''
         self.w2v_model = Word2Vec.load(filepath)
         self.tag_vectors = self.w2v_model.wv
+        self.tag_list = self.tag_vectors.vocab.keys()
         self.vectorize_movies()
 
     def load_d2v_model(self, filepath):
@@ -148,7 +150,8 @@ class Movie2Vec(object):
             u_recs.append((u_movie, probab))
         return u_recs
 
-    def alt_recommend_movies(self, pos_movies=[], neg_movies=[], num_recs=10):
+    def alt_recommend_movies(self, pos_movies=[], pos_tags=[], neg_movies=[], \
+        neg_tags=[], num_recs=10):
         '''
         Instead of Doc2Vec, takes the average of all the tag vectors created by
         Word2Vec for each movie to get a vector representation of the movie.
@@ -168,7 +171,8 @@ class Movie2Vec(object):
         distances.
         '''
         #self.vectorize_movies()
-        result_vector = self.get_result_vector(pos_movies, neg_movies)
+        result_vector = self.get_result_vector(pos_movies, pos_tags, neg_movies, \
+            neg_tags)
         sorted_indices, cosine_similarities = self.compute_cosine(result_vector)
         alt_similar_movies = []
         i = 0
@@ -183,31 +187,74 @@ class Movie2Vec(object):
         u_alt_similar_movies = self.convert_to_unicode(alt_similar_movies)
         return u_alt_similar_movies
 
-    def get_result_vector(self, pos_movies, neg_movies):
+    # def get_result_vector(self, pos_movies, neg_movies):
+    #     '''
+    #     Takes in lists of indices of positive movies and negative movies.
+    #     For each movie, calculates vector by averaging vectors of tags for movie.
+    #     Adds pos_vectors and subtracts neg_vectors to get result vector, returns
+    #     result vector.
+    #     '''
+    #     #one_tag = self.movie_df.tags.loc[pos_movies[0]][0] # Get an example tag
+    #     tag_vec_size = len(self.tag_vectors['Action']) # Get size of a tag vector
+    #     pos_vectors = np.zeros([len(pos_movies),tag_vec_size])
+    #     for idx, movie_idx in enumerate(pos_movies):
+    #         pos_vectors[idx] = self.movie_vector_matrix[movie_idx]
+    #     if len(neg_movies) != 0:
+    #         neg_vectors = np.zeros([len(neg_movies),tag_vec_size])
+    #         for idx, movie_idx in enumerate(neg_movies):
+    #             neg_vectors[idx] = self.movie_vector_matrix[movie_idx]
+    #     else:
+    #         neg_vectors = np.zeros([1,tag_vec_size])
+    #     result_vector = np.sum(pos_vectors, axis=0) - np.sum(neg_vectors, axis=0)
+    #     return result_vector
+
+    def get_result_vector(self, pos_movies, pos_tags, neg_movies, neg_tags):
         '''
-        Takes in lists of indices of positive movies and negative movies.
-        For each movie, calculates vector by averaging vectors of tags for movie.
-        Adds pos_vectors and subtracts neg_vectors to get result vector, returns
-        result vector.
+        Takes in lists of indices of positive movies and negative movies, and lists
+        of positive tags and negative tags. Gets corresponding movie vectors and tag
+        vectors, then adds the positive and subtracts the negative to get the result
+        vector to return.
         '''
-        #one_tag = self.movie_df.tags.loc[pos_movies[0]][0] # Get an example tag
+        # Get movie vectors
         tag_vec_size = len(self.tag_vectors['Action']) # Get size of a tag vector
-        pos_vectors = np.zeros([len(pos_movies),tag_vec_size])
+        pos_movie_vectors = np.zeros([len(pos_movies),tag_vec_size])
         for idx, movie_idx in enumerate(pos_movies):
-            pos_vectors[idx] = self.movie_vector_matrix[movie_idx]
+            pos_movie_vectors[idx] = self.movie_vector_matrix[movie_idx]
         if len(neg_movies) != 0:
-            neg_vectors = np.zeros([len(neg_movies),tag_vec_size])
+            neg_movie_vectors = np.zeros([len(neg_movies),tag_vec_size])
             for idx, movie_idx in enumerate(neg_movies):
-                neg_vectors[idx] = self.movie_vector_matrix[movie_idx]
+                neg_movie_vectors[idx] = self.movie_vector_matrix[movie_idx]
         else:
-            neg_vectors = np.zeros([1,tag_vec_size])
-        result_vector = np.sum(pos_vectors, axis=0) - np.sum(neg_vectors, axis=0)
+            neg_movie_vectors = np.zeros([1,tag_vec_size])
+
+        # Get tag vectors
+        if len(pos_tags) != 0:
+            pos_tag_vectors = np.zeros([len(pos_tags),tag_vec_size])
+            for idx, tag in enumerate(pos_tags):
+                pos_tag_vectors[idx] = self.tag_vectors[tag]
+        else:
+            pos_tag_vectors = np.zeros([1,tag_vec_size])
+        if len(neg_tags) != 0:
+            neg_tag_vectors = np.zeros([len(neg_tags),tag_vec_size])
+            for idx, tag in enumerate(neg_tags):
+                neg_tag_vectors[idx] = self.tag_vectors[tag]
+        else:
+            neg_tag_vectors = np.zeros([1,tag_vec_size])
+
+        # Get result vector
+        result_vector = np.sum(pos_movie_vectors, axis=0) \
+                        + np.sum(pos_tag_vectors, axis=0) \
+                        - np.sum(neg_movie_vectors, axis=0) \
+                        - np.sum(neg_tag_vectors, axis=0)
         return result_vector
 
     def vectorize_movies(self):
         '''
         Creates vector representations of all movies in dataframe based on their
-        tags. Initializes movie_vector_matrix: numpy array with number of rows
+        tags, by averaging all the tag vectors for a particular movie to get a
+        vector for that movie.
+
+        Initializes movie_vector_matrix: numpy array with number of rows
         being number of movies, and number of columns being size of tag vectors.
         '''
         tag_vec_size = len(self.tag_vectors['Action']) # Get size of a tag vector
@@ -246,21 +293,49 @@ class Movie2Vec(object):
         cosine_similarities = cosine_similarities[sorted_indices] # Sort cosine similarities
         return sorted_indices, cosine_similarities
 
+    # def parse_input(self, in_string):
+    #     '''
+    #     Input: string(s) of movie(s) entered by user - str: in_string
+    #     (could replace in_string with pos_string and neg_string later)
+    #
+    #     Output: list(s) of indices of movies in movie_df that can be given to model
+    #     - lst: pos_movies and neg_movies
+    #     '''
+    #     pos_movies = [] # list of indices of movies to add
+    #     neg_movies = [] # list of indices of movies to subtract
+    #     movies_lst = in_string.split('|')
+    #     for movie in movies_lst:
+    #         movie_idx = self.movie_df.loc[self.movie_df.title == movie].index[0]
+    #         pos_movies.append(movie_idx)
+    #     return pos_movies
+
     def parse_input(self, in_string):
         '''
-        Input: string(s) of movie(s) entered by user - str: in_string
-        (could replace in_string with pos_string and neg_string later)
+        Input:
+        ------
+        in_string: str entered by user (could contain both movies and tags)
 
-        Output: list(s) of indices of movies in movie_df that can be given to model
-        - lst: pos_movies and neg_movies
+        Output:
+        -------
+        movies: lst of indices of movies to add/subtract
+        tags: lst of strings of tags to add/subtract
         '''
-        pos_movies = [] # list of indices of movies to add
-        neg_movies = [] # list of indices of movies to subtract
-        movies_lst = in_string.split('|')
-        for movie in movies_lst:
-            movie_idx = self.movie_df.loc[self.movie_df.title == movie].index[0]
-            pos_movies.append(movie_idx)
-        return pos_movies
+        # pos_movies = [] # list of indices of movies to add
+        # neg_movies = [] # list of indices of movies to subtract
+        movies = [] # list of indices of movies to add/subtract
+        tags = [] # list of strings of tags to add/subtract
+        #tag_vocab = self.tag_vectors.vocab.keys() # List of tags in vocabulary
+        input_list = in_string.split('|')
+        for input_str in input_list:
+            if input_str in self.movie_df.values: # If string is movie title
+                movie_idx = self.movie_df.loc[self.movie_df.title == input_str].index[0]
+                movies.append(movie_idx)
+            elif input_str in self.tag_list:
+                tags.append(input_str)
+            else:
+                # Input is in incorrect format
+                print 'Incorrect input!'
+        return movies, tags
 
 
 if __name__ == '__main__':
