@@ -224,7 +224,7 @@ class Movie2Vec(object):
                     tag_vec_array[i] = np.zeros([1,tag_vec_size])
             movie_vector = np.mean(tag_vec_array, axis=0)
             self.movie_vector_matrix[movie_idx] = movie_vector
-        print 'Finished creating movie vector matrix.'
+        print 'Finished creating movie vector matrix.\n'
 
     def compute_cosine(self, result_vector):
         '''
