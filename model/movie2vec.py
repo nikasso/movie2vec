@@ -185,7 +185,11 @@ class Movie2Vec(object):
                     cosine_similarities[i]))
                 i += 1
         u_alt_similar_movies = self.convert_to_unicode(alt_similar_movies)
-        return u_alt_similar_movies
+        recs = [] # Final recommendations to be outputted
+        for movie, sim in u_alt_similar_movies:
+            rounded_sim = '{0:.3f}'.format(sim)
+            recs.append((movie, rounded_sim))
+        return recs
 
     # def get_result_vector(self, pos_movies, neg_movies):
     #     '''
