@@ -304,6 +304,46 @@ class Movie2Vec(object):
                 print 'Incorrect input!'
         return movies, tags
 
+    # def show_common_tags(self, pos_movies, pos_tags, neg_movies, neg_tags):
+    #     '''
+    #     Input:
+    #     ------
+    #     List of indices for positive movies and negative movies, and list of
+    #     positive tags and negative tags
+    #
+    #     Output:
+    #     -------
+    #     If only positive movies exist, returns intersection of tags amongst
+    #     movies. If only negative movies exist, returns same. If both exist,
+    #     returns the difference between the intersections (basically what common
+    #     tags are in negative movies that are not in positive movies).
+    #     '''
+    #     pos_tags_lst = [] # List of lists of positive tags
+    #     neg_tags_lst = [] # List of lists of negative tags
+    #     common_pos_tags = []
+    #     common_neg_tags = []
+    #     if len(pos_movies) > 0:
+    #         for movie_idx in pos_movies:
+    #             movie_tags = self.movie_df.tags.loc[movie_idx]
+    #             pos_tags_lst.append(movie_tags)
+    #         # Intersection of positive tags
+    #         common_pos_tags = list(set.intersection(*map(set,pos_tags_lst)))
+    #     if len(neg_movies) > 0:
+    #         for movie_idx in neg_movies:
+    #             movie_tags = self.movie_df.tags.loc[movie_idx]
+    #             neg_tags_lst.append(movie_tags)
+    #         # Intersection of negative tags
+    #         common_neg_tags = list(set.intersection(*map(set,neg_tags_lst)))
+    #     if len(common_pos_tags) > 0 and len(common_neg_tags) > 0:
+    #         common_tags = list(np.setdiff1d(common_neg_tags,common_pos_tags))
+    #     elif len(common_pos_tags) > 0:
+    #         common_tags = pos_tags_lst
+    #     elif len(common_neg_tags) > 0:
+    #         common_tags = neg_tags_lst
+    #     else:
+    #         common_tags = []
+    #     return common_tags
+
 
 if __name__ == '__main__':
     pass

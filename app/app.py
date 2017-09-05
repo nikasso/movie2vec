@@ -15,7 +15,7 @@ from movie2vec import Movie2Vec
 app = Flask(__name__)
 
 m2v = Movie2Vec()
-m2v.load_w2v_model('../model/models/w2v_model4') # Choose Word2Vec model to load
+m2v.load_w2v_model('../model/models/w2v_model3') # Choose Word2Vec model to load
 
 
 @app.route('/', methods=['GET'])
@@ -46,6 +46,9 @@ def predict():
     # Uses tag vector averaging
     recs = m2v.alt_recommend_movies(pos_movies=pos_movies, pos_tags=pos_tags, \
         neg_movies=neg_movies, neg_tags=neg_tags)
+
+    # Get common tags
+    # common_tags = m2v.show_common_tags(pos_movies,pos_tags,neg_movies,neg_tags)
 
     return render_template('predict.html', pos_movies_entered=pos_data, \
         neg_movies_entered=neg_data, recommendations=recs)
