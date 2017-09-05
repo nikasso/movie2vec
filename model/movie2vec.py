@@ -191,27 +191,6 @@ class Movie2Vec(object):
             recs.append((movie, rounded_sim))
         return recs
 
-    # def get_result_vector(self, pos_movies, neg_movies):
-    #     '''
-    #     Takes in lists of indices of positive movies and negative movies.
-    #     For each movie, calculates vector by averaging vectors of tags for movie.
-    #     Adds pos_vectors and subtracts neg_vectors to get result vector, returns
-    #     result vector.
-    #     '''
-    #     #one_tag = self.movie_df.tags.loc[pos_movies[0]][0] # Get an example tag
-    #     tag_vec_size = len(self.tag_vectors['Action']) # Get size of a tag vector
-    #     pos_vectors = np.zeros([len(pos_movies),tag_vec_size])
-    #     for idx, movie_idx in enumerate(pos_movies):
-    #         pos_vectors[idx] = self.movie_vector_matrix[movie_idx]
-    #     if len(neg_movies) != 0:
-    #         neg_vectors = np.zeros([len(neg_movies),tag_vec_size])
-    #         for idx, movie_idx in enumerate(neg_movies):
-    #             neg_vectors[idx] = self.movie_vector_matrix[movie_idx]
-    #     else:
-    #         neg_vectors = np.zeros([1,tag_vec_size])
-    #     result_vector = np.sum(pos_vectors, axis=0) - np.sum(neg_vectors, axis=0)
-    #     return result_vector
-
     def get_result_vector(self, pos_movies, pos_tags, neg_movies, neg_tags):
         '''
         Takes in lists of indices of positive movies and negative movies, and lists
@@ -296,22 +275,6 @@ class Movie2Vec(object):
         sorted_indices = np.argsort(cosine_similarities)[::-1] # Get sorted movie indices
         cosine_similarities = cosine_similarities[sorted_indices] # Sort cosine similarities
         return sorted_indices, cosine_similarities
-
-    # def parse_input(self, in_string):
-    #     '''
-    #     Input: string(s) of movie(s) entered by user - str: in_string
-    #     (could replace in_string with pos_string and neg_string later)
-    #
-    #     Output: list(s) of indices of movies in movie_df that can be given to model
-    #     - lst: pos_movies and neg_movies
-    #     '''
-    #     pos_movies = [] # list of indices of movies to add
-    #     neg_movies = [] # list of indices of movies to subtract
-    #     movies_lst = in_string.split('|')
-    #     for movie in movies_lst:
-    #         movie_idx = self.movie_df.loc[self.movie_df.title == movie].index[0]
-    #         pos_movies.append(movie_idx)
-    #     return pos_movies
 
     def parse_input(self, in_string):
         '''

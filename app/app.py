@@ -15,7 +15,7 @@ from movie2vec import Movie2Vec
 app = Flask(__name__)
 
 m2v = Movie2Vec()
-m2v.load_w2v_model('../model/models/w2v_model3') # Choose Word2Vec model to load
+m2v.load_w2v_model('../model/models/w2v_model4') # Choose Word2Vec model to load
 
 
 @app.route('/', methods=['GET'])

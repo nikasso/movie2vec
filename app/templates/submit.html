@@ -12,20 +12,23 @@
 
 </head>
 
-<body>
+<body style="font-family:helvetica; background-color:rgb(239, 245, 245)">
 
-  <h1>Submit Your Movies</h1>
-  <p>Enter the movies you want to add (pipe-separated) into the input box
-    below on the left, and the movies you want to subtract (pipe-separated)
+  <h1 style="text-align:center; color: rgb(29, 48, 48)">Submit Your Movies</h1>
+  <p style="text-align:center;">Enter the movies/tags you want to add (pipe-separated) into the input box
+    below on the left,<br/> and the movies/tags you want to subtract (pipe-separated)
     into the input box below on the right.</p>
-  <p>Click the <span>Recommend</span> button to get your movie recommendations.</p>
+  <p style="text-align:center;">Click the <span>Recommend</span> button to get your movie recommendations.</p>
 
   <form action="/predict" method='POST' >
+      <center>
       <textarea name="pos_movies_entered",
                 rows="1", cols="60"></textarea>
       <textarea name="neg_movies_entered",
                 rows="1", cols="60"></textarea>
+      <br>
       <button type="submit">Recommend</button>
+    </center>
   </form>
 
 </body>

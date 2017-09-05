@@ -12,17 +12,22 @@
 
 </head>
 
-<body>
+<body style="font-family:helvetica; background-color:rgb(239, 245, 245);">
 
-  <h1>Your Movie Recommendations</h1>
+  <h1 style="text-align:center; color: rgb(29, 48, 48)">Your Movie Recommendations</h1>
 
-  <span style="color: blue; font-weight: bold;">Movies You Entered</span>
-  <p>Movies added: {{ pos_movies_entered }}</p>
-  <p>Movies subtracted: {{ neg_movies_entered }}</p>
-  <span style="color: blue; font-weight: bold;">Your Recommendations</span>
-  <table class="table">
+  <div style="text-align: center;">
+    <span style="color: rgb(48, 156, 120); font-weight: bold;">Movies/Tags You Entered</span>
+  </div>
+  <p style="text-align:center;"><strong>Added:</strong> {{ pos_movies_entered }}</p>
+  <p style="text-align:center;"><strong>Subtracted:</strong> {{ neg_movies_entered }}</p>
+  <div style="text-align: center;">
+    <span style="color: rgb(48, 156, 120); font-weight: bold;">Your Recommendations</span>
+  </div>
+  <br>
+  <table class="table" align="center" style="margin: 0px auto;">
     <col width="350">
-    <col width="250">
+    <col width="75">
       <thead>
           <th align="left">Movies</th>
           <th align="left">Similarity</th>
