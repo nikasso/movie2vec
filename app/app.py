@@ -17,6 +17,12 @@ app = Flask(__name__)
 m2v = Movie2Vec()
 m2v.load_w2v_model('../model/models/w2v_model3') # Choose Word2Vec model to load
 
+# Remove rows from movie dataframe where movie titles are empty strings
+# This skews recommendations when there is no user input in the subtracting form
+# Code below to be moved into preprocessing2.py script later
+empty_title_df = m2v.movie_df[m2v.movie_df.title == '']
+m2v.movie_df = m2v.movie_df.drop(empty_title_df.index.values,axis=0)
+
 
 @app.route('/', methods=['GET'])
 def index():
