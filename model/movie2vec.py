@@ -293,15 +293,16 @@ class Movie2Vec(object):
         tags = [] # list of strings of tags to add/subtract
         #tag_vocab = self.tag_vectors.vocab.keys() # List of tags in vocabulary
         input_list = in_string.split('|')
-        for input_str in input_list:
-            if input_str in self.movie_df.values: # If string is movie title
-                movie_idx = self.movie_df.loc[self.movie_df.title == input_str].index[0]
-                movies.append(movie_idx)
-            elif input_str in self.tag_list:
-                tags.append(input_str)
-            else:
-                # Input is in incorrect format
-                print 'Incorrect input!'
+        if input_list != ['']:  # Only do the following if something was entered
+            for input_str in input_list:
+                if input_str in self.movie_df.values: # If string is movie title
+                    movie_idx = self.movie_df.loc[self.movie_df.title == input_str].index[0]
+                    movies.append(movie_idx)
+                elif input_str in self.tag_list:
+                    tags.append(input_str)
+                else:
+                    # Input is in incorrect format
+                    print 'Incorrect input!'
         return movies, tags
 
     # def show_common_tags(self, pos_movies, pos_tags, neg_movies, neg_tags):
