@@ -14,9 +14,8 @@ Some background on Word2Vec: Word2Vec is essentially a shallow neural network th
 
 I used the publicly available MovieLens Latest dataset, which had about 45,000 movies and 48,000 unique tags for the movies. After a little bit of feature engineering, I had an updated dataframe where each row was a movie and it's corresponding tags. For example, one row looks like:
 
-'''
-The Godfather | Crime, must-see, Al Pacino, mafia, oranges, ...
-'''
+> The Godfather | Crime, must-see, Al Pacino, mafia, oranges, ...
+
 
 Then I trained my Word2Vec model on these "sentences" of tags and got vector representations of the tags (so for example I got a vector for "Crime", a vector for "Al Pacino", a vector for "oranges", etc.). Ultimately though, I wanted higher-level vector representations for the movies themselves, since I wanted to add and subtract them from each other. After attempting a couple different approaches I decided to average the vectors for all of the tags for each movie to get movie vectors.
 
@@ -26,7 +25,7 @@ Finally, I created a Flask web app where users can input movies/tags to add and 
 
 Below are some recommendations for example inputs (the web app interface is still being improved):
 
-![Example Recommendations 1][images/example_recommendations_1.png]
+![Example Recommendations 1](images/example_recommendations_1.png)
 
 One simple use case of the recommender is to give it one movie (like The Godfather), and it will recommend a list of similar movies. You can add 2 movies of different genres (like sci-fi and romance), and the recommendations are mostly movies that are a hybrid of both genres. More interestingly though, since the tag vectors and movie vectors exist in the same vector space, you can add and subtract them from each other. If you take the Bond film GoldenEye (starring Pierce Brosnan as 007), subtract Pierce Brosnan, and add Daniel Craig, the top recommendations are Daniel Craig's Bond movies.
 
