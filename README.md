@@ -36,3 +36,7 @@ I am currently working on making my web app live for people to use without runni
 Additionally, I'd like to extend the application to better add/subtract directors, actors/actresses, and screenwriters - possibly by scraping additional data from IMDB and joining it with the data I have, to make these features more standardized.
 
 And finally, I want to do some t-SNE or k-means clustering of my movie vectors for visualization purposes, to get a better sense of how my model is grouping them.
+
+## Thanks
+
+I'd like to thank the Galvanize DSI instructors who gave me guidance on this project, and alumni Doosan (Jackson) Jung and Peter Hughes for some inspiration. I'd also like to thank MovieLens for making the data that I worked with publicly available.
